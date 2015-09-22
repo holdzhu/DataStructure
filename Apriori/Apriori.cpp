@@ -316,20 +316,37 @@ private:
 	int getSupport(int* itemset, int K)
 	{
 		int support = 0;
-		for (int i = 0; i < mItemData[itemset[0]].size(); ++i)
+		for (int it1 = 0, it2 = 0; it1 < mItemData[itemset[0]].size() && it2 < mItemData[itemset[1]].size(); )
 		{
-			int pos = 0;
-			for (int j = mItemData[itemset[0]][i].second; j < mData[mItemData[itemset[0]][i].first].size(); ++j)
+			if (mItemData[itemset[0]][it1].first == mItemData[itemset[1]][it2].first)
 			{
-				if (mData[mItemData[itemset[0]][i].first][j] == itemset[pos])
+				int pos = 2;
+				for (int j = mItemData[itemset[1]][it2].second + 1; j < mData[mItemData[itemset[1]][it2].first].size(); ++j)
 				{
-					pos++;
+					if (mData[mItemData[itemset[1]][it2].first][j] == itemset[pos])
+					{
+						pos++;
+					}
+					else if (mData[mItemData[itemset[1]][it2].first][j] > itemset[pos])
+					{
+						break;
+					}
+					if (pos == K)
+					{
+						support++;
+						break;
+					}
 				}
-				if (pos == K)
-				{
-					support++;
-					break;
-				}
+				it1++;
+				it2++;
+			}
+			else if (mItemData[itemset[0]][it1].first < mItemData[itemset[1]][it2].first)
+			{
+				it1++;
+			}
+			else
+			{
+				it2++;
 			}
 		}
 		return support;
