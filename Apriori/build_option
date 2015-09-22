@@ -1,0 +1,1 @@
+g++ Apriori.cpp -o Apriori.exe -std=c++11 -fopenmp -D__NO_INLINE__ -O3

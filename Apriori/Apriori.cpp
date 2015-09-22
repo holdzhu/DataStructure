@@ -147,14 +147,10 @@ public:
 		delete cnt;
 		for (int K = 2; K <= mItems.size(); ++K)
 		{
-			#pragma omp parallel for
-			for (int k = 0; k < mC[K - 2].size(); ++k)
+			for (Node* node : mC[K - 2])
 			{
-				Node *node = mC[K - 2][k];
 				int* itemset = new int[K];
 				Node** nodeset = new Node*[K - 2];
-				Node** subnodeset = new Node*[K - 2];
-				int* candidate = new int[node->children.size()];
 				int pos = K - 3;
 				Node* tmp = node;
 				while (tmp != root)
@@ -167,28 +163,45 @@ public:
 					}
 					pos--;
 				}
+				int coreNum = omp_get_num_procs();
+				std::vector<Node*>* coreC = new std::vector<Node*>[coreNum];
+				Node*** subnodeset = new Node**[coreNum];
+				int** candidate = new int*[coreNum];
+				int** coreItemset = new int*[coreNum];
+				for (int i = 0; i < coreNum; ++i)
+				{
+					subnodeset[i] = new Node*[K - 2];
+					candidate[i] = new int[node->children.size()];
+					coreItemset[i] = new int[K];
+					for (int j = 0; j < K - 2; ++j)
+					{
+						coreItemset[i][j] = itemset[j];
+					}
+				}
+				#pragma omp parallel for
 				for (int i = 0; i < node->children.size(); ++i)
 				{
+					int ogtn = omp_get_thread_num();
 					int candidateCnt = 0;
 					for (int j = i + 1; j < node->children.size(); ++j)
 					{
-						candidate[candidateCnt++] = j;
+						candidate[ogtn][candidateCnt++] = j;
 					}
 					for (int j = 0; j < K - 2 && candidateCnt > 0; ++j)
 					{
-						subnodeset[j] = findChild(nodeset[j], node->children[i].first).second;
+						subnodeset[ogtn][j] = findChild(nodeset[j], node->children[i].first).second;
 						int it1 = 0;
 						int it2 = 0;
 						int it = 0;
-						while (it1 < candidateCnt && it2 < subnodeset[j]->children.size())
+						while (it1 < candidateCnt && it2 < subnodeset[ogtn][j]->children.size())
 						{
-							if (node->children[candidate[it1]].first == subnodeset[j]->children[it2].first)
+							if (node->children[candidate[ogtn][it1]].first == subnodeset[ogtn][j]->children[it2].first)
 							{
-								candidate[it++] = candidate[it1];
+								candidate[ogtn][it++] = candidate[ogtn][it1];
 								it1++;
 								it2++;
 							}
-							else if (node->children[candidate[it1]].first < subnodeset[j]->children[it2].first)
+							else if (node->children[candidate[ogtn][it1]].first < subnodeset[ogtn][j]->children[it2].first)
 							{
 								it1++;
 							}
@@ -199,33 +212,42 @@ public:
 						}
 						candidateCnt = it;
 					}
-					itemset[K - 2] = node->children[i].first;
+					coreItemset[ogtn][K - 2] = node->children[i].first;
 					for (int j = 0; j < candidateCnt; ++j)
 					{
-						itemset[K - 1] = node->children[candidate[j]].first;
-						int support = getSupport(itemset, K);
+						coreItemset[ogtn][K - 1] = node->children[candidate[ogtn][j]].first;
+						int support = getSupport(coreItemset[ogtn], K);
 						if (support >= mThreshold)
 						{
 							node->children[i].second->isMaximal = false;
-							node->children[candidate[j]].second->isMaximal = false;
+							node->children[candidate[ogtn][j]].second->isMaximal = false;
 							for (int it = 0; it < K - 2; ++it)
 							{
-								findChild(subnodeset[it], node->children[candidate[j]].first).second->isMaximal = false;
+								findChild(subnodeset[ogtn][it], node->children[candidate[ogtn][j]].first).second->isMaximal = false;
 							}
 							Node* newNode = new Node;
 							newNode->parent = node->children[i].second;
-							newNode->value = node->children[candidate[j]].first;
+							newNode->value = node->children[candidate[ogtn][j]].first;
 							newNode->isMaximal = true;
 							newNode->support = support;
 							newNode->K = K;
-							node->children[i].second->children.push_back(std::make_pair(node->children[candidate[j]].first, newNode));
-							mC[K].push_back(newNode);
+							node->children[i].second->children.push_back(std::make_pair(node->children[candidate[ogtn][j]].first, newNode));
+							coreC[ogtn].push_back(newNode);
 						}
 					}
 				}
+				for (int i = 0; i < coreNum; ++i)
+				{
+					for (int j = 0; j < coreC[i].size(); ++j)
+					{
+						mC[K].push_back(coreC[i][j]);
+					}
+				}
+				delete[] candidate;
+				delete[] subnodeset;
+				delete[] coreItemset;
+				delete[] coreC;
 				delete nodeset;
-				delete subnodeset;
-				delete candidate;
 				delete itemset;
 			}
 		}
@@ -320,8 +342,8 @@ private:
 		{
 			if (mItemData[itemset[0]][it1].first == mItemData[itemset[1]][it2].first)
 			{
-				int pos = 2;
-				for (int j = mItemData[itemset[1]][it2].second + 1; j < mData[mItemData[itemset[1]][it2].first].size(); ++j)
+				int pos = 1;
+				for (int j = mItemData[itemset[1]][it2].second; j < mData[mItemData[itemset[1]][it2].first].size(); ++j)
 				{
 					if (mData[mItemData[itemset[1]][it2].first][j] == itemset[pos])
 					{
