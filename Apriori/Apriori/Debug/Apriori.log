@@ -1,0 +1,37 @@
+﻿生成启动时间为 2015/9/23 18:50:13。
+     1>项目“F:\DataStructure\Apriori\Apriori\Apriori.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /openmp /Yu"stdafx.h" /Fp"Debug\Apriori.pch" /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt Apriori.cpp
+         Apriori.cpp
+     1>f:\datastructure\apriori\apriori\apriori.cpp(79): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(81): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(95): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(99): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(101): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(107): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(140): warning C4018: “<=”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(164): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(168): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(178): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(223): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(243): warning C4018: “<=”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(245): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(251): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(262): warning C4018: “<=”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(264): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(273): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(284): warning C4018: “<=”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(286): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(291): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(300): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(335): warning C4018: “<”: 有符号/无符号不匹配
+     1>f:\datastructure\apriori\apriori\apriori.cpp(346): warning C4018: “<”: 有符号/无符号不匹配
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"F:\DataStructure\Apriori\Debug\Apriori.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"F:\DataStructure\Apriori\Debug\Apriori.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\DataStructure\Apriori\Debug\Apriori.lib" /MACHINE:X86 Debug\Apriori.obj
+         Debug\stdafx.obj
+         Apriori.vcxproj -> F:\DataStructure\Apriori\Debug\Apriori.exe
+     1>已完成生成项目“F:\DataStructure\Apriori\Apriori\Apriori.vcxproj”(Build 个目标)的操作。
+
+已成功生成。
+
+已用时间 00:00:01.64
