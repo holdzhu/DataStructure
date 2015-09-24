@@ -118,7 +118,6 @@ public:
 				mC[1].push_back(newNode);
 			}
 		}
-		delete cnt;
 		int coreNum = omp_get_num_procs();
 		Node** subnodeset = new Node*[mItems.size() - 2];
 		Node** nodeset = new Node*[mItems.size() - 2];
@@ -126,7 +125,6 @@ public:
 		int* candidate = new int[mItems.size()];
 		int* superset = new int[mData.size()];
 		int* superset2 = new int[mData.size()];
-		std::vector<Node*>* coreC = new std::vector<Node*>[coreNum];
 		for (int K = 2; K <= mItems.size(); ++K)
 		{
 			for (Node* node : mC[K - 2])
@@ -143,34 +141,17 @@ public:
 					}
 					pos--;
 				}
-				int supersetNum = 0;
+				int supersetNum = -1;
 				if (K > 2)
 				{
-					supersetNum = mItemData[itemset[0]].size();
-					for (int i = 0; i < supersetNum; ++i)
-					{
-						superset[i] = mItemData[itemset[0]][i];
-					}
-					for (int i = 1; i < K - 2; ++i)
+					for (int i = 0; i < K - 2; ++i)
 					{
 						supersetNum = merge(superset, supersetNum, mItemData[itemset[i]], superset);
 					}
 				}
 				for (int i = 0; i < node->children.size(); ++i)
 				{
-					int superset2Num;
-					if (K == 2)
-					{
-						superset2Num = mItemData[node->children[i].first].size();
-						for (int j = 0; j < superset2Num; ++j)
-						{
-							superset2[j] = mItemData[node->children[i].first][j];
-						}
-					}
-					else
-					{
-						superset2Num = merge(superset, supersetNum, mItemData[node->children[i].first], superset2);
-					}
+					int superset2Num = merge(superset, supersetNum, mItemData[node->children[i].first], superset2);
 					int candidateCnt = 0;
 					for (int j = i + 1; j < node->children.size(); ++j)
 					{
@@ -201,11 +182,20 @@ public:
 						}
 						candidateCnt = it;
 					}
-#pragma omp parallel for
 					for (int j = 0; j < candidateCnt; ++j)
 					{
-						int support = merge(superset2, superset2Num, mItemData[node->children[candidate[j]].first], NULL);
-						if (support >= mThreshold)
+						cnt[node->children[candidate[j]].first] = 0;
+					}
+					for (int j = 0; j < superset2Num; ++j)
+					{
+						for (int t : mData[superset2[j]])
+						{
+							cnt[t]++;
+						}
+					}
+					for (int j = 0; j < candidateCnt; ++j)
+					{
+						if (cnt[node->children[candidate[j]].first] >= mThreshold)
 						{
 							node->children[i].second->isMaximal = false;
 							node->children[candidate[j]].second->isMaximal = false;
@@ -217,19 +207,11 @@ public:
 							newNode->parent = node->children[i].second;
 							newNode->value = node->children[candidate[j]].first;
 							newNode->isMaximal = true;
-							newNode->support = support;
+							newNode->support = cnt[node->children[candidate[j]].first];
 							newNode->K = K;
-							coreC[omp_get_thread_num()].push_back(newNode);
-						}
-					}
-					for (int j = 0; j < coreNum; ++j)
-					{
-						for (Node* newNode : coreC[j])
-						{
 							node->children[i].second->children.push_back(std::make_pair(newNode->value, newNode));
 							mC[K].push_back(newNode);
 						}
-						coreC[j].clear();
 					}
 				}
 			}
@@ -240,7 +222,7 @@ public:
 		delete[] subnodeset;
 		delete[] superset;
 		delete[] superset2;
-		delete[] coreC;
+		delete cnt;
 	}
 
 	void printFrequentSet()
@@ -327,6 +309,14 @@ private:
 
 	int merge(int* A, int n, std::vector<int> B, int* C)
 	{
+		if (n == -1)
+		{
+			for (int i = 0; i < B.size(); ++i)
+			{
+				C[i] = B[i];
+			}
+			return B.size();
+		}
 		int it = 0;
 		for (int it1 = 0, it2 = 0; it1 < n && it2 < B.size(); )
 		{
@@ -437,5 +427,6 @@ int main()
 	apriori.printTopFrequentSet(10);
 	finish = clock();
 	std::cout << "Time: " << (double)(finish - start) / CLOCKS_PER_SEC << "s." << std::endl;
+	system("pause");
 	return 0;
 }
