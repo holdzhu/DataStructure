@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <algorithm>
 #include <stdexcept>
 #include <ctime>
@@ -119,109 +119,116 @@ public:
 			}
 		}
 		int coreNum = omp_get_num_procs();
-		Node** subnodeset = new Node*[mItems.size() - 2];
-		Node** nodeset = new Node*[mItems.size() - 2];
-		int* itemset = new int[mItems.size()];
-		int* candidate = new int[mItems.size()];
-		int* superset = new int[mData.size()];
-		int* superset2 = new int[mData.size()];
+		Node*** subnodeset = new Node**[coreNum];
+		Node*** nodeset = new Node**[coreNum];
+		int** itemset = new int*[coreNum];
+		int** superset = new int*[coreNum];
+		int** superset2 = new int*[coreNum];
+		int** support = new int*[coreNum];
+		std::pair<int, int>** order = new std::pair<int, int>*[coreNum];
+		std::vector<Node*>* coreC = new std::vector<Node*>[coreNum];
+		std::vector<Node*>* coreUnmaximal = new std::vector<Node*>[coreNum];
+		for (int i = 0; i < coreNum; ++i)
+		{
+			subnodeset[i] = new Node*[mItems.size() - 2];
+			nodeset[i] = new Node*[mItems.size() - 2];
+			itemset[i] = new int[mItems.size()];
+			superset[i] = new int[mData.size()];
+			superset2[i] = new int[mData.size()];
+			support[i] = new int[mItems.size()];
+			order[i] = new std::pair<int, int>[mItems.size()];
+		}
 		for (int K = 2; K <= mItems.size(); ++K)
 		{
-			for (Node* node : mC[K - 2])
+#pragma omp parallel for
+			for (int k = 0; k < mC[K - 2].size(); ++k)
 			{
+				int ogtn = omp_get_thread_num();
+				Node* node = mC[K - 2][k];
 				int pos = K - 3;
 				Node* tmp = node;
 				while (tmp != root)
 				{
-					itemset[pos] = tmp->value;
-					nodeset[pos] = tmp = tmp->parent;
+					itemset[ogtn][pos] = tmp->value;
+					nodeset[ogtn][pos] = tmp = tmp->parent;
 					for (int i = pos + 1; i < K - 2; ++i)
 					{
-						nodeset[pos] = findChild(nodeset[pos], itemset[i]).second;
+						nodeset[ogtn][pos] = findChild(nodeset[ogtn][pos], itemset[ogtn][i]).second;
 					}
 					pos--;
 				}
 				int supersetNum = -1;
-				if (K > 2)
+				for (int i = 0; i < K - 2; ++i)
 				{
-					for (int i = 0; i < K - 2; ++i)
-					{
-						supersetNum = merge(superset, supersetNum, mItemData[itemset[i]], superset);
-					}
+					order[ogtn][i] = std::make_pair(mItemData[itemset[ogtn][i]].size(), i);
+				}
+				std::sort(order[ogtn], order[ogtn] + K - 2);
+				for (int i = 0; i < K - 2; ++i)
+				{
+					supersetNum = intersect(superset[ogtn], supersetNum, mItemData[itemset[ogtn][order[ogtn][i].second]], superset[ogtn]);
 				}
 				for (int i = 0; i < node->children.size(); ++i)
 				{
-					int superset2Num = merge(superset, supersetNum, mItemData[node->children[i].first], superset2);
-					int candidateCnt = 0;
+					int superset2Num = intersect(superset[ogtn], supersetNum, mItemData[node->children[i].first], superset2[ogtn]);
+					for (int j = 0; j < K - 2; ++j)
+					{
+						subnodeset[ogtn][j] = findChild(nodeset[ogtn][j], node->children[i].first).second;
+					}
 					for (int j = i + 1; j < node->children.size(); ++j)
 					{
-						candidate[candidateCnt++] = j;
-					}
-					for (int j = 0; j < K - 2 && candidateCnt > 0; ++j)
-					{
-						subnodeset[j] = findChild(nodeset[j], node->children[i].first).second;
-						int it1 = 0;
-						int it2 = 0;
-						int it = 0;
-						while (it1 < candidateCnt && it2 < subnodeset[j]->children.size())
-						{
-							if (node->children[candidate[it1]].first == subnodeset[j]->children[it2].first)
-							{
-								candidate[it++] = candidate[it1];
-								it1++;
-								it2++;
-							}
-							else if (node->children[candidate[it1]].first < subnodeset[j]->children[it2].first)
-							{
-								it1++;
-							}
-							else
-							{
-								it2++;
-							}
-						}
-						candidateCnt = it;
-					}
-					for (int j = 0; j < candidateCnt; ++j)
-					{
-						cnt[node->children[candidate[j]].first] = 0;
+						support[ogtn][node->children[j].first] = 0;
 					}
 					for (int j = 0; j < superset2Num; ++j)
 					{
-						for (int t : mData[superset2[j]])
+						for (int t : mData[superset2[ogtn][j]])
 						{
-							cnt[t]++;
+							support[ogtn][t]++;
 						}
 					}
-					for (int j = 0; j < candidateCnt; ++j)
+					for (int j = i + 1; j < node->children.size(); ++j)
 					{
-						if (cnt[node->children[candidate[j]].first] >= mThreshold)
+						if (support[ogtn][node->children[j].first] >= mThreshold)
 						{
 							node->children[i].second->isMaximal = false;
-							node->children[candidate[j]].second->isMaximal = false;
+							node->children[j].second->isMaximal = false;
 							for (int it = 0; it < K - 2; ++it)
 							{
-								findChild(subnodeset[it], node->children[candidate[j]].first).second->isMaximal = false;
+								coreUnmaximal[ogtn].push_back(findChild(subnodeset[ogtn][it], node->children[j].first).second);
 							}
 							Node* newNode = new Node;
 							newNode->parent = node->children[i].second;
-							newNode->value = node->children[candidate[j]].first;
+							newNode->value = node->children[j].first;
 							newNode->isMaximal = true;
-							newNode->support = cnt[node->children[candidate[j]].first];
+							newNode->support = support[ogtn][node->children[j].first];
 							newNode->K = K;
 							node->children[i].second->children.push_back(std::make_pair(newNode->value, newNode));
-							mC[K].push_back(newNode);
+							coreC[ogtn].push_back(newNode);
 						}
 					}
 				}
 			}
+			for (int i = 0; i < coreNum; ++i)
+			{
+				for (Node* newNode : coreC[i])
+				{
+					mC[K].push_back(newNode);
+				}
+				for (Node* node : coreUnmaximal[i])
+				{
+					node->isMaximal = false;
+				}
+				coreC[i].clear();
+				coreUnmaximal[i].clear();
+			}
 		}
-		delete[] candidate;
 		delete[] itemset;
 		delete[] nodeset;
 		delete[] subnodeset;
 		delete[] superset;
 		delete[] superset2;
+		delete[] coreC;
+		delete[] coreUnmaximal;
+		delete[] order;
 		delete cnt;
 	}
 
@@ -307,7 +314,7 @@ private:
 		return *(--std::lower_bound(node->children.begin(), node->children.end(), std::make_pair(value + 1, (Node*)NULL)));
 	}
 
-	int merge(int* A, int n, std::vector<int> B, int* C)
+	int intersect(int* A, int n, std::vector<int> B, int* C)
 	{
 		if (n == -1)
 		{
@@ -388,7 +395,7 @@ int main()
 	int databaseSize;
 	// std::cout << "Input the number of database: ";
 	std::cin >> databaseSize;
-	std::map<std::string, int> ID;
+	std::unordered_map<std::string, int> ID;
 	for (int i = 0; i < databaseSize; ++i)
 	{
 		// std::cout << "Input the items of itemset_" << i + 1 << " : ";
