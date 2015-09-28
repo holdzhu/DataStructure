@@ -1,41 +1,67 @@
 #include <iostream>
+#include <cmath>
 #include <algorithm>
+#include <limits>
 #include <vector>
 #include <stdexcept>
 
 const int MAXN = 100000;
+const int intLimit = std::numeric_limits<int>::max();
+const long double eps = 1e-15;
 
 class RationalNumber
 {
 
 public:
 
-	RationalNumber(long long numerator = 0, long long denominator = 1) throw(std::domain_error) : numerator(numerator), denominator(denominator)
+	explicit RationalNumber(long long numerator = 0, long long denominator = 1) throw(std::domain_error) : numerator(numerator), denominator(denominator)
 	{
 		if (denominator == 0)
 		{
 			throw std::domain_error("Denominator cannot be zero!");
 		}
+		fraction = true;
 		reduce();
+	}
+
+	explicit RationalNumber(long double realNumber) : realNumber(realNumber)
+	{
+		fraction = false;
 	}
 	
 	RationalNumber operator + (const RationalNumber& B) const
 	{
+		if (!isFraction() || !B.isFraction())
+		{
+			return RationalNumber(getRealNumber() + B.getRealNumber());
+		}
 		return RationalNumber(numerator * B.denominator + denominator * B.numerator, denominator * B.denominator);
 	}
 	
 	RationalNumber operator - (const RationalNumber& B) const
 	{
+		if (!isFraction() || !B.isFraction())
+		{
+			return RationalNumber(getRealNumber() - B.getRealNumber());
+		}
 		return RationalNumber(numerator * B.denominator - denominator * B.numerator, denominator * B.denominator);
 	}
 	
 	RationalNumber operator * (const RationalNumber& B) const
 	{
+		if (!isFraction() || !B.isFraction())
+		{
+			return RationalNumber(getRealNumber() * B.getRealNumber());
+		}
 		return RationalNumber(numerator * B.numerator, denominator * B.denominator);
 	}
 	
 	RationalNumber operator / (const RationalNumber& B) const throw(std::domain_error)
 	{
+		if (!isFraction() || !B.isFraction())
+		{
+			return RationalNumber(getRealNumber() / B.getRealNumber());
+		}
 		if (B.numerator == 0)
 		{
 			throw std::domain_error("Division by zero!");
@@ -45,13 +71,18 @@ public:
 
 	RationalNumber operator ^ (const RationalNumber& B) const throw(std::invalid_argument)
 	{
-		if (B.isNonnegativeInteger())
+		if (!isFraction() || !B.isInteger())
 		{
-			throw std::invalid_argument("Invalid exponent!");
+			return RationalNumber(powl(getRealNumber(), B.getRealNumber()));
 		}
 		RationalNumber S(1, 1);
 		RationalNumber A = *this;
 		long long n = B.numerator;
+		if (n < 0)
+		{
+			A = RationalNumber(1, 1) / A;
+			n = -n;
+		}
 		while (n)
 		{
 			if (n & 1)
@@ -66,27 +97,49 @@ public:
 
 	friend std::ostream& operator << (std::ostream& out, RationalNumber rn)
 	{
-		out << rn.numerator;
-		if (rn.denominator != 1)
+		if (!rn.fraction)
 		{
-			out << '/' << rn.denominator;
+			out << (double)rn.getRealNumber();
+		}
+		else
+		{
+			out << rn.numerator;
+			if (rn.denominator != 1)
+			{
+				out << '/' << rn.denominator;
+			}
 		}
 		return out;
 	}
 
-	bool isZero()
+	bool isZero() const
 	{
-		return numerator == 0;
+		return (fraction && numerator == 0) || (!fraction && std::abs(realNumber) < eps);
 	}
 
-	bool isInteger()
+	bool isInteger() const
 	{
-		return denominator == 1;
+		return fraction && denominator == 1;
 	}
 
 	bool isNonnegativeInteger() const
 	{
-		return denominator == 1 && numerator >= 0;
+		return fraction && denominator == 1 && numerator >= 0;
+	}
+
+	bool isFraction() const
+	{
+		return fraction;
+	}
+
+	bool isPositive() const
+	{
+		return (fraction && numerator > 0) || (!fraction && realNumber > 0);
+	}
+
+	bool isUnit() const
+	{
+		return fraction && std::abs(numerator) == 1;
 	}
 
 	long long getNumerator() const
@@ -94,20 +147,37 @@ public:
 		return numerator;
 	}
 
+	long double getRealNumber() const
+	{
+		return realNumber;
+	}
+
 private:
 
 	long long numerator;
 	long long denominator;
+	bool fraction;
+	long double realNumber;
 
 	void reduce()
 	{
-		if (denominator < 0)
+		if (!fraction)
 		{
-			denominator = -denominator;
+			return;
 		}
 		long long gcd = std::__gcd(numerator, denominator);
 		numerator /= gcd;
 		denominator /= gcd;
+		if (denominator < 0)
+		{
+			numerator = -numerator;
+			denominator = -denominator;
+		}
+		if (std::abs(numerator) > intLimit || std::abs(denominator) > intLimit)
+		{
+			fraction = false;
+		}
+		realNumber = (long double)numerator / denominator;
 	}
 
 };
@@ -188,14 +258,14 @@ public:
 		if (x)
 		{
 			array.resize(2);
-			array[1] = RationalNumber(1);
+			array[1] = RationalNumber(1LL);
 		}
 	}
 
-	Polynomial(RationalNumber rn)
+	Polynomial(RationalNumber rn, int times = 0)
 	{
-		array.resize(1);
-		array[0] = rn;
+		array.resize(times + 1);
+		array[times] = rn;
 	}
 	
 	Polynomial operator + (const Polynomial& B) const
@@ -237,7 +307,7 @@ public:
 			}
 			else
 			{
-				poly.array[i] = B.array[i] * RationalNumber(-1);
+				poly.array[i] = B.array[i] * RationalNumber(-1LL);
 			}
 		}
 		poly.autoResize();
@@ -247,7 +317,7 @@ public:
 	Polynomial operator * (const Polynomial& B) const
 	{
 		Polynomial poly;
-		poly.array.resize(size() + B.size() - 1);
+		poly.array.resize(std::max(size() + B.size() - 1, 0));
 		for (int i = 0; i < size(); ++i)
 		{
 			for (int j = 0; j < B.size(); ++j)
@@ -255,24 +325,36 @@ public:
 				poly.array[i + j] = poly.array[i + j] + array[i] * B.array[j];
 			}
 		}
+		poly.autoResize();
 		return poly;
 	}
 	
 	Polynomial operator / (const Polynomial& B) const throw(std::domain_error)
 	{
-		if (B.size() > 1)
+		if (B.size() == 0)
+		{
+			throw std::domain_error("Division by zero!");
+		}
+		if (this->size() == 0)
+		{
+			return Polynomial();
+		}
+		if (size() < B.size())
 		{
 			throw std::domain_error("Division by polynomial!");
 		}
-		else if (B.size() == 0)
-		{
-			throw std::domain_error("Division by 0!");
-		}
+		Polynomial A = *this;
 		Polynomial poly;
-		poly.array.resize(size());
-		for (int i = 0; i < size(); ++i)
+		poly.array.resize(size() - B.size() + 1);
+		for (int i = size() - B.size(); i >= 0; --i)
 		{
-			poly.array[i] = array[i] / B.array[0];
+			poly.array[i] = A.array[i + B.size() - 1] / B.array[B.size() - 1];
+			A = A - B * Polynomial(poly.array[i], i);
+		}
+		A.autoResize();
+		if (A.size() != 0 && this->size() > 1)
+		{
+			throw std::domain_error("Division by polynomial!");
 		}
 		poly.autoResize();
 		return poly;
@@ -280,14 +362,18 @@ public:
 
 	Polynomial operator ^ (const Polynomial& B) const throw(std::invalid_argument)
 	{
-		Polynomial S(RationalNumber(1));
+		Polynomial S(RationalNumber(1LL));
 		if (B.size() == 0)
 		{
 			return S;
 		}
-		if (B.size() > 1 || !B.array[0].isNonnegativeInteger())
+		if (B.size() > 1 || (this->size() > 1 && !B.array[0].isNonnegativeInteger()))
 		{
 			throw std::invalid_argument("Invalid exponent!");
+		}
+		if (!B.array[0].isNonnegativeInteger())
+		{
+			return Polynomial(this->array[0] ^ B.array[0]);
 		}
 		Polynomial A = *this;
 		long long n = B.array[0].getNumerator();
@@ -310,20 +396,20 @@ public:
 		{
 			if (!poly.array[i].isZero())
 			{
-				if (poly.array[i].getNumerator() > 0)
+				if (poly.array[i].isPositive() > 0)
 				{
 					if (!first)
 					{
 						out << '+';
 					}
-					if (!(poly.array[i].getNumerator() == 1 && poly.array[i].isInteger() && i > 0))
+					if (!(poly.array[i].isUnit() && poly.array[i].isInteger() && i > 0))
 					{
 						out << poly.array[i];
 					}
 				}
 				else
 				{
-					if (!(poly.array[i].getNumerator() == -1 && poly.array[i].isInteger() && i > 0))
+					if (!(poly.array[i].isUnit() && poly.array[i].isInteger() && i > 0))
 					{
 						out << poly.array[i];
 					}
@@ -689,7 +775,7 @@ public:
 	{
 		Polynomial A = ps.top();
 		ps.pop();
-		A = A * Polynomial(RationalNumber(-1));
+		A = A * Polynomial(RationalNumber(-1LL));
 		ps.push(A);
 	}
 	
@@ -860,6 +946,9 @@ Status* OperatorStatus::getInstance()
 	return mStatus;
 }
 
+const RationalNumber PI = RationalNumber(acosl(-1));
+const RationalNumber E = RationalNumber(expl(1));
+
 class Expression
 {
 
@@ -899,18 +988,25 @@ public:
 				{
 					int id = 0;
 					++it;
-					while (it != str.end())
+					if (!isdigit(*it))
 					{
-						if (isdigit(*it))
+						id = mHistory.size() - 1;
+					}
+					else
+					{
+						while (it != str.end())
 						{
-							id *= 10;
-							id += *it - '0';
+							if (isdigit(*it))
+							{
+								id *= 10;
+								id += *it - '0';
+							}
+							else
+							{
+								break;
+							}
+							++it;
 						}
-						else
-						{
-							break;
-						}
-						++it;
 					}
 					--it;
 					if (id >= mHistory.size())
@@ -935,8 +1031,8 @@ public:
 							}
 							else
 							{
-								rn = rn * RationalNumber(10);
-								rn = rn + RationalNumber(*it - '0');
+								rn = rn * RationalNumber(10LL);
+								rn = rn + RationalNumber((long long)(*it - '0'));
 							}
 						}
 						else if (*it == '.' && !hasDot)
@@ -955,6 +1051,15 @@ public:
 				else if (*it == 'x')
 				{
 					status->dealPolynomial(status, os, ps, Polynomial(true));
+				}
+				else if (*it == 'p' && it + 1 != str.end() && *(it + 1) == 'i')
+				{
+					it++;
+					status->dealPolynomial(status, os, ps, Polynomial(PI));
+				}
+				else if (*it == 'e')
+				{
+					status->dealPolynomial(status, os, ps, Polynomial(E));
 				}
 				else
 				{

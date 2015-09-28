@@ -234,43 +234,57 @@ public:
 
 	void printFrequentSet()
 	{
-		std::vector<Node*> C;
 		for (int K = 1; K <= mItems.size(); ++K)
 		{
+			int cnt = 0;
+			std::vector<Node*> C;
 			for (int j = 0; j < mC[K].size(); ++j)
 			{
 				C.push_back(mC[K][j]);
+				cnt++;
 			}
+			if (cnt == 0)
+			{
+				break;
+			}
+			std::cout << K << " frequent itemset (Count " << cnt << "): ";
+			std::sort(C.begin(), C.end(), nodeCompare);
+			for (int i = 0; i < C.size(); ++i)
+			{
+				printNode(C[i]);
+				std::cout << ' ';
+			}
+			std::cout << std::endl;
 		}
-		std::sort(C.begin(), C.end(), nodeCompare);
-		for (int i = 0; i < C.size(); ++i)
-		{
-			printNode(C[i]);
-			std::cout << ' ';
-		}
-		std::cout << std::endl;
 	}
 
 	void printMaximalFrequentSet()
 	{
-		std::vector<Node*> C;
 		for (int K = 1; K <= mItems.size(); ++K)
 		{
+			int cnt = 0;
+			std::vector<Node*> C;
 			for (int j = 0; j < mC[K].size(); ++j)
 			{
 				if (mC[K][j]->isMaximal)
 				{
 					C.push_back(mC[K][j]);
+					cnt++;
 				}
 			}
+			if (cnt == 0)
+			{
+				continue;
+			}
+			std::cout << K << " frequent itemset (Count " << cnt << "): ";
+			std::sort(C.begin(), C.end(), nodeCompare);
+			for (int i = 0; i < C.size(); ++i)
+			{
+				printNode(C[i]);
+				std::cout << ' ';
+			}
+			std::cout << std::endl;
 		}
-		std::sort(C.begin(), C.end(), nodeCompare);
-		for (int i = 0; i < C.size(); ++i)
-		{
-			printNode(C[i]);
-			std::cout << ' ';
-		}
-		std::cout << std::endl;
 	}
 
 	void printTopFrequentSet(int k)
@@ -383,9 +397,9 @@ private:
 
 int main()
 {
-	std::ifstream fin("F:\\DataStructure\\Apriori_bak\\T40I10D100K.dat");
+	std::ifstream fin("F:\\DataStructure\\Apriori_bak\\input.txt");
 	std::cin.rdbuf(fin.rdbuf());
-	std::ofstream fout("F:\\DataStructure\\Apriori_bak\\T40I10D100K.out");
+	std::ofstream fout("F:\\DataStructure\\Apriori_bak\\output.txt");
 	std::cout.rdbuf(fout.rdbuf());
 	clock_t start, finish;
 	start = clock();
@@ -428,10 +442,13 @@ int main()
 	apriori.run();
 	std::cout << "Frequent set: " << std::endl;
 	apriori.printFrequentSet();
+	std::cout << std::endl;
 	std::cout << "Maximal frequent set: " << std::endl;
 	apriori.printMaximalFrequentSet();
-	std::cout << "Top 10 frequent set (larger than 1): " << std::endl;
-	apriori.printTopFrequentSet(10);
+	std::cout << std::endl;
+	std::cout << "Top 100 frequent set (larger than 1): " << std::endl;
+	apriori.printTopFrequentSet(100);
+	std::cout << std::endl;
 	finish = clock();
 	std::cout << "Time: " << (double)(finish - start) / CLOCKS_PER_SEC << "s." << std::endl;
 	system("pause");
