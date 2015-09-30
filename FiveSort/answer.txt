@@ -1,0 +1,256 @@
+YES
+1: if a<b goto 2 else goto 3
+2: if c<d goto 4 else goto 5
+3: if c<d goto 6 else goto 7
+4: if a<c goto 8 else goto 9
+5: if a<d goto 10 else goto 11
+6: if a<d goto 12 else goto 13
+7: if a<c goto 14 else goto 15
+8: if c<e goto 16 else goto 17
+9: if a<e goto 18 else goto 19
+10: if d<e goto 20 else goto 21
+11: if a<e goto 22 else goto 23
+12: if a<e goto 24 else goto 25
+13: if d<e goto 26 else goto 27
+14: if a<e goto 28 else goto 29
+15: if c<e goto 30 else goto 31
+16: if d<e goto 32 else goto 33
+17: if a<e goto 34 else goto 35
+18: if b<e goto 36 else goto 37
+19: if a<d goto 38 else goto 39
+20: if c<e goto 40 else goto 41
+21: if a<e goto 42 else goto 43
+22: if b<e goto 44 else goto 45
+23: if a<c goto 46 else goto 47
+24: if a<c goto 48 else goto 49
+25: if b<e goto 50 else goto 51
+26: if a<e goto 52 else goto 53
+27: if c<e goto 54 else goto 55
+28: if a<d goto 56 else goto 57
+29: if b<e goto 58 else goto 59
+30: if a<e goto 60 else goto 61
+31: if d<e goto 62 else goto 63
+32: if b<d goto 64 else goto 65
+33: if b<e goto 66 else goto 67
+34: if b<c goto 68 else goto 69
+35: if b<c goto 70 else goto 71
+36: if b<d goto 72 else goto 73
+37: if d<e goto 74 else goto 75
+38: if b<d goto 76 else goto 77
+39: if c<e goto 78 else goto 79
+40: if b<c goto 80 else goto 81
+41: if b<e goto 82 else goto 83
+42: if b<d goto 84 else goto 85
+43: if b<c goto 86 else goto 87
+44: if b<c goto 88 else goto 89
+45: if c<e goto 90 else goto 91
+46: if b<c goto 92 else goto 93
+47: if c<e goto 94 else goto 95
+48: if c<e goto 96 else goto 97
+49: if b<c goto 98 else goto 99
+50: if c<e goto 100 else goto 101
+51: if b<c goto 102 else goto 103
+52: if b<c goto 104 else goto 105
+53: if b<d goto 106 else goto 107
+54: if b<e goto 108 else goto 109
+55: if b<c goto 110 else goto 111
+56: if c<e goto 112 else goto 113
+57: if b<d goto 114 else goto 115
+58: if d<e goto 116 else goto 117
+59: if b<d goto 118 else goto 119
+60: if b<c goto 120 else goto 121
+61: if b<c goto 122 else goto 123
+62: if b<e goto 124 else goto 125
+63: if b<d goto 126 else goto 127
+64: if b<c goto 128 else goto 129
+65: if b<e goto 130 else goto 131
+66: if b<c goto 132 else goto 133
+67: if b<d goto 134 else goto 135
+68: if b<e goto 136 else goto 137
+69: if b<d goto 138 else goto 139
+70: if a<b goto 140 else goto 141
+71: if b<d goto 142 else goto 143
+72: if d<e goto 144 else goto 145
+73: if a<d goto 146 else goto 147
+74: if a<d goto 148 else goto 149
+75: if b<d goto 150 else goto 151
+76: if c<e goto 152 else goto 153
+77: if c<e goto 154 else goto 155
+78: if d<e goto 156 else goto 157
+79: if a<b goto 158 else goto 159
+80: if b<d goto 160 else goto 161
+81: if b<e goto 162 else goto 163
+82: if b<d goto 164 else goto 165
+83: if b<c goto 166 else goto 167
+84: if b<e goto 168 else goto 169
+85: if b<c goto 170 else goto 171
+86: if b<d goto 172 else goto 173
+87: if a<b goto 174 else goto 175
+88: if c<e goto 176 else goto 177
+89: if a<c goto 178 else goto 179
+90: if a<c goto 180 else goto 181
+91: if b<c goto 182 else goto 183
+92: if d<e goto 184 else goto 185
+93: if d<e goto 186 else goto 187
+94: if a<b goto 188 else goto 189
+95: if d<e goto 190 else goto 191
+96: if d<e goto 192 else goto 193
+97: if a<b goto 194 else goto 195
+98: if d<e goto 196 else goto 197
+99: if d<e goto 198 else goto 199
+100: if b<c goto 200 else goto 201
+101: if a<c goto 202 else goto 203
+102: if a<c goto 204 else goto 205
+103: if c<e goto 206 else goto 207
+104: if a<b goto 208 else goto 209
+105: if b<d goto 210 else goto 211
+106: if b<c goto 212 else goto 213
+107: if b<e goto 214 else goto 215
+108: if b<c goto 216 else goto 217
+109: if b<d goto 218 else goto 219
+110: if b<e goto 220 else goto 221
+111: if b<d goto 222 else goto 223
+112: if a<b goto 224 else goto 225
+113: if d<e goto 226 else goto 227
+114: if c<e goto 228 else goto 229
+115: if c<e goto 230 else goto 231
+116: if b<d goto 232 else goto 233
+117: if a<d goto 234 else goto 235
+118: if a<d goto 236 else goto 237
+119: if d<e goto 238 else goto 239
+120: if b<d goto 240 else goto 241
+121: if a<b goto 242 else goto 243
+122: if b<d goto 244 else goto 245
+123: if b<e goto 246 else goto 247
+124: if b<d goto 248 else goto 249
+125: if b<c goto 250 else goto 251
+126: if b<e goto 252 else goto 253
+127: if b<c goto 254 else goto 255
+128: a b c d e
+129: a c b d e
+130: a c d b e
+131: a c d e b
+132: a b c e d
+133: a c b e d
+134: a c e b d
+135: a c e d b
+136: a b e c d
+137: a e b c d
+138: a e c b d
+139: a e c d b
+140: e a b c d
+141: None
+142: e a c b d
+143: e a c d b
+144: c a b d e
+145: c a b e d
+146: c a d b e
+147: c d a b e
+148: c a d e b
+149: c d a e b
+150: c a e b d
+151: c a e d b
+152: c e a b d
+153: e c a b d
+154: c e a d b
+155: e c a d b
+156: c d e a b
+157: c e d a b
+158: e c d a b
+159: None
+160: a b d c e
+161: a d b c e
+162: a d c b e
+163: a d c e b
+164: a b d e c
+165: a d b e c
+166: a d e b c
+167: a d e c b
+168: a b e d c
+169: a e b d c
+170: a e d b c
+171: a e d c b
+172: e a b d c
+173: e a d b c
+174: e a d c b
+175: None
+176: d a b c e
+177: d a b e c
+178: d a c b e
+179: d c a b e
+180: d a c e b
+181: d c a e b
+182: d a e b c
+183: d a e c b
+184: d e a b c
+185: e d a b c
+186: d e a c b
+187: e d a c b
+188: d c e a b
+189: None
+190: d e c a b
+191: e d c a b
+192: b a c d e
+193: b a c e d
+194: None
+195: b a e c d
+196: b c a d e
+197: b c a e d
+198: c b a d e
+199: c b a e d
+200: b c e a d
+201: c b e a d
+202: b e a c d
+203: b e c a d
+204: e b a c d
+205: e b c a d
+206: c e b a d
+207: e c b a d
+208: None
+209: b c d a e
+210: c b d a e
+211: c d b a e
+212: b c d e a
+213: c b d e a
+214: c d b e a
+215: c d e b a
+216: b c e d a
+217: c b e d a
+218: c e b d a
+219: c e d b a
+220: b e c d a
+221: e b c d a
+222: e c b d a
+223: e c d b a
+224: None
+225: b a d c e
+226: b a d e c
+227: b a e d c
+228: b d a c e
+229: b d a e c
+230: d b a c e
+231: d b a e c
+232: b d e a c
+233: d b e a c
+234: b e a d c
+235: b e d a c
+236: e b a d c
+237: e b d a c
+238: d e b a c
+239: e d b a c
+240: b d c a e
+241: d b c a e
+242: None
+243: d c b a e
+244: b d c e a
+245: d b c e a
+246: d c b e a
+247: d c e b a
+248: b d e c a
+249: d b e c a
+250: d e b c a
+251: d e c b a
+252: b e d c a
+253: e b d c a
+254: e d b c a
+255: e d c b a
